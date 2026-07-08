@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Taste — Inspiration Canvas</title>
+<style>
+  :root{--bg:#0b0b0c;--panel:#151517;--line:rgba(255,255,255,.09);--ink:#ededee;--muted:#8a8a8f;--hint:#5c5c62;--accent:#37d39a}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh}
+  .bar{display:flex;align-items:center;gap:12px;padding:14px 22px;border-bottom:1px solid var(--line);flex:0 0 auto}
+  .bar a{color:var(--muted);text-decoration:none;font-size:13px}
+  .bar a.home{color:var(--ink)}
+  .bar .name{margin-left:8px;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--ink);font-size:15px;padding:5px 2px;outline:none;min-width:220px}
+  .bar .spacer{flex:1}
+  .btn{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:20px;padding:7px 15px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:rgba(255,255,255,.28)}
+  .btn.primary{background:var(--accent);color:#052; border-color:transparent;font-weight:500}
+  main{flex:1;display:flex;min-height:0}
+  .lib{width:230px;border-right:1px solid var(--line);overflow:auto;padding:14px}
+  .lib h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);margin:2px 0 10px;font-weight:500}
+  .lib .thumb{position:relative;border-radius:9px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:1px solid var(--line)}
+  .lib .thumb img{width:100%;display:block}
+  .lib .thumb .add{position:absolute;inset:0;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0;transition:.15s}
+  .lib .thumb:hover .add{opacity:1}
+  .board{flex:1;overflow:auto;padding:22px;background:#0e0f13;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:22px 22px}
+  .note{width:100%;max-width:640px;background:#0e0f13;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:13px;padding:10px 12px;margin-bottom:18px;resize:vertical;min-height:52px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .card{position:relative;border-radius:11px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+  .card img{width:100%;display:block}
+  .card .x{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1}
+  .card .cap{padding:8px 10px;font-size:11px;color:var(--muted)}
+  .empty{color:var(--hint);padding:50px 0;text-align:center;font-size:13px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:13px;color:var(--ink);opacity:0;transition:.2s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="bar">
+  <a class="home" href="index.html">Design Taste</a><span style="color:var(--hint)">/ canvas</span><a href="gallery.html">· explore</a>
+  <input class="name" id="boardName" placeholder="Name this board…" value="Untitled board">
+  <span class="spacer"></span>
+  <button class="btn" id="saveRef">Save as taste ref</button>
+  <button class="btn primary" id="exportLLM">Export for LLM</button>
+</div>
+<main>
+  <div class="lib" id="lib"><h3>References</h3></div>
+  <div class="board">
+    <textarea class="note" id="note" placeholder="What is this board about? What are you pulling from these?"></textarea>
+    <div class="grid" id="grid"><div class="empty">Click references on the left to add them to the board.</div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script src="manifest.js"></script>
+<script>
+  const M = window.TASTE_MANIFEST || {items:[]};
+  const withImg = M.items.filter(i=>i.image);
+  const lib = document.getElementById('lib');
+  const grid = document.getElementById('grid');
+  const board = [];
+  withImg.forEach(i=>{
+    const d=document.createElement('div');d.className='thumb';
+    d.innerHTML=`<img src="images/${i.image}" alt=""><div class="add">＋</div>`;
+    d.onclick=()=>addToBoard(i);
+    lib.appendChild(d);
+  });
+  function render(){
+    if(!board.length){grid.innerHTML='<div class="empty">Click references on the left to add them to the board.</div>';return;}
+    grid.innerHTML='';
+    board.forEach((i,idx)=>{
+      const c=document.createElement('div');c.className='card';
+      c.innerHTML=`<button class="x" title="remove">×</button><img src="images/${i.image}" alt=""><div class="cap">${i.title}</div>`;
+      c.querySelector('.x').onclick=()=>{board.splice(idx,1);render();};
+      grid.appendChild(c);
+    });
+  }
+  function addToBoard(i){ if(!board.find(b=>b.id===i.id)){board.push(i);render();toast('Added · '+i.title);} }
+  function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),1900);}
+  function slug(s){return (s||'board').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+  function download(name,text,type){const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+  document.getElementById('exportLLM').onclick=()=>{
+    if(!board.length){toast('Add a few references first');return;}
+    const name=document.getElementById('boardName').value||'Untitled board';
+    const note=document.getElementById('note').value.trim();
+    const tags=[...new Set(board.flatMap(b=>b.tags||[]))];
+    let out=`Design taste board: ${name}\n`;
+    if(note) out+=`Intent: ${note}\n`;
+    out+=`Shared signals: ${tags.join(', ')}\n\nReferences (${board.length}):\n`;
+    board.forEach(b=>{out+=`- ${b.title} [${(b.tags||[]).join(', ')}] — ${b.rationale||''}\n`;});
+    out+=`\nUse this board as the visual direction. Match its shared signals and the intent above.`;
+    navigator.clipboard.writeText(out).then(()=>toast('LLM prompt copied to clipboard'),()=>{download(slug(name)+'.txt',out,'text/plain');toast('Downloaded LLM prompt');});
+  };
+  document.getElementById('saveRef').onclick=()=>{
+    if(!board.length){toast('Add a few references first');return;}
+    const name=document.getElementById('boardName').value||'Untitled board';
+    const note=document.getElementById('note').value.trim();
+    const entry={id:slug(name),title:name,type:'reference',cluster:board.map(b=>b.image),
+      tags:[...new Set(board.flatMap(b=>b.tags||[]))],dimensions:[...new Set(board.flatMap(b=>b.dimensions||[]))],
+      rationale:note||('Board combining: '+board.map(b=>b.title).join('; ')),origin:'',date:new Date().toISOString().slice(0,10),source:'Inspiration Canvas board'};
+    download(slug(name)+'.cluster.json',JSON.stringify(entry,null,2),'application/json');
+    toast('Saved cluster JSON · drop in _inbox or say "ingest"');
+  };
+  render();
+</script>
+</body>
+</html>

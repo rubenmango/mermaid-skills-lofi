@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Taste</title>
+<style>
+  :root{
+    --bg:#0b0b0c; --panel:#151517; --line:rgba(255,255,255,.08);
+    --ink:#ededee; --muted:#8a8a8f; --hint:#5c5c62; --accent:#e7e7e9;
+  }
+  body.light{
+    --bg:#f6f5f2; --panel:#ffffff; --line:rgba(0,0,0,.08);
+    --ink:#1a1a1a; --muted:#6b6b6b; --hint:#a0a0a0; --accent:#1a1a1a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  header{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:24px;padding:20px 40px;background:linear-gradient(var(--bg),var(--bg) 72%,transparent)}
+  .brand{display:flex;align-items:center;gap:9px;font-size:14px;letter-spacing:.02em;color:var(--ink);white-space:nowrap}
+  .brand .dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted)}
+  .search{flex:1;max-width:420px;margin:0 auto;background:transparent;border:none;border-bottom:1px solid var(--line);color:var(--ink);font-size:14px;padding:8px 2px;outline:none;text-align:center}
+  .search::placeholder{color:var(--hint)}
+  .filters{display:flex;gap:16px;white-space:nowrap}
+  .filters button{background:none;border:none;color:var(--hint);font-size:13px;letter-spacing:.02em;cursor:pointer;padding:2px 0;transition:color .15s}
+  .filters button:hover{color:var(--muted)}
+  .filters button.active{color:var(--ink)}
+  .theme{background:none;border:1px solid var(--line);color:var(--muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px}
+  .masonry{columns:270px;column-gap:20px;padding:8px 40px 80px}
+  .item{break-inside:avoid;margin:0 0 20px}
+  figure{margin:0;position:relative;border-radius:12px;overflow:hidden;background:var(--panel);cursor:zoom-in}
+  figure img{width:100%;display:block}
+  .overlay{position:absolute;inset:0;opacity:0;transition:opacity .2s ease;background:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,.1) 45%,rgba(0,0,0,0) 70%);display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+  figure:hover .overlay{opacity:1}
+  .o-title{color:#fff;font-size:13px;font-weight:500;line-height:1.35;margin-bottom:6px}
+  .o-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+  .o-tags span{font-size:10.5px;color:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:1px 8px}
+  .o-foot{display:flex;align-items:center;justify-content:space-between}
+  .o-type{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+  .o-src{font-size:11px;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.5)}
+  .note{padding:16px 16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+  .n-type{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--hint);margin-bottom:8px}
+  .n-title{font-size:14px;font-weight:500;margin-bottom:6px}
+  .n-why{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+  .n-tags{display:flex;flex-wrap:wrap;gap:5px}
+  .n-tags span{font-size:10.5px;color:var(--hint);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+  .n-src{display:inline-block;margin-top:10px;font-size:11px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+  .empty{color:var(--hint);padding:60px 40px;text-align:center}
+  @media(max-width:640px){header{padding:16px 20px;gap:14px;flex-wrap:wrap}.search{order:3;max-width:none;flex-basis:100%}.masonry{padding:8px 20px 60px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html" style="text-decoration:none;color:inherit"><span class="dot"></span>Design Taste</a>
+  <input class="search" id="q" placeholder="Search your taste">
+  <div class="filters" id="filters"></div>
+  <button class="theme" id="theme" aria-label="Toggle theme">☾</button>
+</header>
+<div class="masonry" id="grid"></div>
+<script src="manifest.js"></script>
+<script>
+  const M = window.TASTE_MANIFEST || {items:[]};
+  const grid = document.getElementById('grid');
+  const filtersEl = document.getElementById('filters');
+  const q = document.getElementById('q');
+  let type = 'all', query = '';
+  const types = ['all','own','reference','rejection'];
+  function matches(i){
+    if(type!=='all' && i.type!==type) return false;
+    if(!query) return true;
+    const hay = (i.title+' '+(i.tags||[]).join(' ')+' '+(i.rationale||'')+' '+(i.dimensions||[]).join(' ')).toLowerCase();
+    return hay.includes(query);
+  }
+  function render(){
+    const items = M.items.filter(matches);
+    if(!items.length){grid.innerHTML='<div class="empty">Nothing here yet.</div>';return;}
+    grid.innerHTML = items.map(i=>{
+      const tags=(i.tags||[]).slice(0,4).map(t=>`<span>${t}</span>`).join('');
+      const src = i.origin ? `<a class="o-src" href="${i.origin}" target="_blank" rel="noopener">source</a>` : '<span></span>';
+      if(i.image){
+        return `<div class="item"><figure>
+          <img src="images/${i.image}" alt="" loading="lazy">
+          <div class="overlay">
+            <div class="o-title">${i.title}</div>
+            <div class="o-tags">${tags}</div>
+            <div class="o-foot"><span class="o-type">${i.type}</span>${src}</div>
+          </div></figure></div>`;
+      }
+      const nsrc = i.origin ? `<a class="n-src" href="${i.origin}" target="_blank" rel="noopener">open source</a>` : '';
+      return `<div class="item"><div class="note">
+        <div class="n-type">${i.type}</div>
+        <div class="n-title">${i.title}</div>
+        <p class="n-why">${i.rationale||''}</p>
+        <div class="n-tags">${(i.tags||[]).map(t=>`<span>${t}</span>`).join('')}</div>
+        ${nsrc}
+      </div></div>`;
+    }).join('');
+  }
+  types.forEach(t=>{
+    const b=document.createElement('button');b.textContent=t;if(t==='all')b.classList.add('active');
+    b.onclick=()=>{type=t;[...filtersEl.children].forEach(c=>c.classList.remove('active'));b.classList.add('active');render();};
+    filtersEl.appendChild(b);
+  });
+  q.addEventListener('input',()=>{query=q.value.trim().toLowerCase();render();});
+  document.getElementById('theme').onclick=function(){document.body.classList.toggle('light');this.textContent=document.body.classList.contains('light')?'☀':'☾';};
+  render();
+</script>
+</body>
+</html>
