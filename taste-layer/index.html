@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Taste</title>
+<style>
+  :root{--bg:#0b0b0c;--panel:#151517;--line:rgba(255,255,255,.08);--ink:#ededee;--muted:#8a8a8f;--hint:#5c5c62}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:64px 32px 80px}
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand .dot{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--muted)}
+  h1{font-size:26px;font-weight:500;margin:0}
+  .sub{color:var(--muted);font-size:14px;margin:6px 0 40px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 22px 20px;transition:border-color .15s,transform .15s}
+  a.card:hover{border-color:rgba(255,255,255,.22);transform:translateY(-2px)}
+  .card .ic{font-size:22px;margin-bottom:12px;display:block}
+  .card h2{font-size:16px;font-weight:500;margin:0 0 4px}
+  .card p{font-size:13px;color:var(--muted);margin:0}
+  .endpoint{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .endpoint h2{font-size:16px;font-weight:500;margin:0 0 4px}
+  .endpoint p{font-size:13px;color:var(--muted);margin:0 0 14px}
+  .links{display:flex;gap:10px;flex-wrap:wrap}
+  .links a{font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:6px 14px}
+  .links a:hover{border-color:rgba(255,255,255,.22)}
+  .quote{margin-top:16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--muted)}
+  footer{color:var(--hint);font-size:12px;margin-top:36px}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span class="dot"></span><h1>Design Taste</h1></div>
+  <div class="sub">My visual taste, in one place — browse it, storyboard from it, or hand it to any AI.</div>
+
+  <div class="cards">
+    <a class="card" href="gallery.html">
+      <span class="ic">◨</span>
+      <h2>Explore</h2>
+      <p>Browse the taste map — own work, references, rejections. Search and filter, Cosmos-style.</p>
+    </a>
+    <a class="card" href="inspiration-canvas.html">
+      <span class="ic">✦</span>
+      <h2>Canvas</h2>
+      <p>Storyboard — collect a few references into a board, save it as a new taste ref, and export it for an LLM.</p>
+    </a>
+  </div>
+
+  <div class="endpoint">
+    <h2>Taste endpoint</h2>
+    <p>The portable profile. Point any AI or IDE at it, or paste the card.</p>
+    <div class="links">
+      <a href="taste.json">taste.json</a>
+      <a href="taste-card.md">taste-card.md</a>
+    </div>
+    <div class="quote">“Use this as my design taste” → attach taste.json (or paste taste-card.md)</div>
+  </div>
+
+  <footer>Self-contained · part of design-skills · updated 2026-07-08</footer>
+</div>
+</body>
+</html>
